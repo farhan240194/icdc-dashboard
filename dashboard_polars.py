@@ -7,7 +7,7 @@ import polars as pl
 
 st.set_page_config(layout="wide", page_title="MDNA YIELD DASHBOARD", initial_sidebar_state = "expanded")
 
-# st.title("MDNA YIELD DASHBOARD")
+st.title("MDNA YIELD DASHBOARD")
 engine = create_engine('sqlite:///example.db') 
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -115,7 +115,7 @@ if st.sidebar.button('Reset Cache'):
     st.sidebar.write('Cache cleared!')
     df = load_data()
 
-
+st.sidebar.markdown("Got new feature request? contact: <br> alokman <br> ICD C team members", unsafe_allow_html=True)
 ############################## SIDEBAR SELECTION LOGIC ##############################
 
 if selected_custom_binning:
