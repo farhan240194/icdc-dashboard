@@ -68,8 +68,8 @@ custom_binning_dict = {
 ## Initial Dataframe
 initial_df = load_data()
 # df = initial_df.unique(subset=['VISUAL_ID', 'LOT', 'OPERATION'])
-filtered_df = initial_df
-filter_for_percentage = initial_df
+filtered_df = initial_df.unique(subset=['VISUAL_ID', 'LOT', 'OPERATION'])
+filter_for_percentage = initial_df.unique(subset=['VISUAL_ID', 'LOT', 'OPERATION'])
 
 ############################## SIDEBAR ##############################
 
@@ -123,35 +123,34 @@ if selected_custom_binning:
     
     if 'OPERATION' in custom_filters:
         filtered_df = filtered_df.filter(pl.col('OPERATION').is_in(custom_filters["OPERATION"]))
-        filter_for_percentage = filtered_df
+        filter_for_percentage = filter_for_percentage.filter(pl.col('OPERATION').is_in(custom_filters["OPERATION"]))
     
     if 'FUNCTIONAL_BIN' in custom_filters:
         filtered_df = filtered_df.filter(pl.col('FUNCTIONAL_BIN').is_in(custom_filters["FUNCTIONAL_BIN"]))
         
     if 'INTERFACE_BIN' in custom_filters:
         filtered_df = filtered_df.filter(pl.col('INTERFACE_BIN').is_in(custom_filters["INTERFACE_BIN"]))
-        filter_for_percentage = filtered_df
         
 else:
+    if 'ALL' not in selected_operations:
+        filtered_df = filtered_df.filter(pl.col('OPERATION').is_in(selected_operations))
+        filter_for_percentage = filter_for_percentage.filter(pl.col('OPERATION').is_in(selected_operations))
+        
     if 'ALL' not in selected_bins:
         filtered_df = filtered_df.filter(pl.col('INTERFACE_BIN').is_in(selected_bins))
 
-    if 'ALL' not in selected_operations:
-        filtered_df = filtered_df.filter(pl.col('OPERATION').is_in(selected_operations))
-        filter_for_percentage = filtered_df
-
 if 'ALL' not in selected_program_name:
     filtered_df = filtered_df.filter(pl.col('PROGRAM_NAME').is_in(selected_program_name))
-    filter_for_percentage = filtered_df
+    filter_for_percentage = filter_for_percentage.filter(pl.col('PROGRAM_NAME').is_in(selected_program_name))
 
 filtered_df = filtered_df.filter(pl.col("LOTS_END_WW").is_between(selected_start_ww,selected_end_ww))
-filter_for_percentage = filtered_df
+filter_for_percentage = filter_for_percentage.filter(pl.col("LOTS_END_WW").is_between(selected_start_ww,selected_end_ww))
     
 tab1, tab2, tab3 = st.tabs(["Yield Summary", "Fail Signature","String Signature"])
 
 with tab1:
-    filtered_df1 = filtered_df.unique(subset=['VISUAL_ID', 'LOT', 'OPERATION'])
-    filter_for_percentage = filtered_df1
+    filtered_df1 = filtered_df
+    filter_for_percentage = filter_for_percentage
 
     all_work_weeks = pl.DataFrame(initial_df['LOTS_END_WW'].unique().sort())
     work_week_counts = filtered_df1.group_by('LOTS_END_WW').agg(pl.len().alias('Count'))
@@ -171,7 +170,7 @@ with tab1:
     work_week_counts = work_week_counts.cast({"LOTS_END_WW": pl.String})
     work_week_counts_table = pl.concat([work_week_counts, total_row])
 
-    st.plotly_chart(fig)
+    st.plotly_chart(fig, key="WW")
 
     with st.expander("View Data Table"):
         st.write(work_week_counts_table)
@@ -197,7 +196,7 @@ with tab1:
                     category_orders={'INTERFACE_BIN': sorted_interface_bins})
     fig_line.update_xaxes(type='category')
     fig_line.update_traces(mode='lines+markers+text', textposition='top center')
-    st.plotly_chart(fig_line)
+    st.plotly_chart(fig_line, key="IB")
     
     pivot_df = percentage_df.pivot(index='INTERFACE_BIN', on='LOTS_END_WW', values='Percentage')
     sorted_pivot = pivot_df.cast({"INTERFACE_BIN" : pl.UInt32})
@@ -235,7 +234,7 @@ with tab1:
 
         fig_functional_line.update_xaxes(type='category')
         fig_functional_line.update_traces(mode='lines+markers+text', textposition='top center')
-        return st.plotly_chart(fig_functional_line)
+        return st.plotly_chart(fig_functional_line, key="FB")
     
     plotly_graph = render_functional_bin_chart(functional_percentage_df,sorted_work_week_array,sorted_functional_bins)
     
@@ -250,7 +249,7 @@ with tab1:
         functional_bin_counts = functional_bin_counts.sort(["FUNCTIONAL_BIN","Count"])
         fig_functional_pie = px.pie(functional_bin_counts, names='FUNCTIONAL_BIN', values='Count', title='Functional Bin Distribution')
         fig_functional_pie.update_layout(height=500)
-        st.plotly_chart(fig_functional_pie)
+        st.plotly_chart(fig_functional_pie, key="FBPIE")
 
         st.dataframe(functional_bin_counts, hide_index=True)
         
@@ -276,7 +275,7 @@ with tab1:
                                         category_orders={"PROGRAM_NAME":sorted_program_name,'INTERFACE_BIN': sorted_interface_bins})
     fig_functional_program_line.update_xaxes(type='category')
     fig_functional_program_line.update_traces(mode='lines+markers+text', textposition='top center')
-    st.plotly_chart(fig_functional_program_line)
+    st.plotly_chart(fig_functional_program_line, key="TP")
     
     pivot_df3 = program_percentage_df.pivot(index='INTERFACE_BIN', on='PROGRAM_NAME', values='Percentage', sort_columns= True)
     pivot_df3 = pivot_df3.cast({"INTERFACE_BIN": pl.UInt32})
@@ -309,7 +308,7 @@ with tab2:
     
     fig = px.pie(test_name_counts, names='TEST_NAME', values='Count')
     fig.update_layout(height=600)
-    st.plotly_chart(fig)
+    st.plotly_chart(fig, key="PATTERN")
     
     st.subheader('Fail Signature Details')
     st.dataframe(count_df2,
@@ -341,7 +340,7 @@ with tab3:
     
     fig = px.pie(test_name_counts, names='TEST_NAME', values='Count')
     fig.update_layout(height=600)
-    st.plotly_chart(fig)
+    st.plotly_chart(fig, key="STRING")
     
     st.subheader('String Signature Details')
     st.dataframe(count_df3,
