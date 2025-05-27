@@ -2,22 +2,22 @@ import pandas as pd
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 from sqlalchemy import DateTime, Float, create_engine
-from models import YourModel
+from models import MDNADB
 from dateutil.parser import parse
 
-engine = create_engine('sqlite:///example.db', echo=True)
+engine = create_engine('sqlite:///data.db', echo=True)
 # Assuming 'engine' is already created as per your SQLAlchemy setup
 Session = sessionmaker(bind=engine)
 session = Session()
 
 # Read the CSV file
-csv_file_path = 'WLW_A15_6261_FUN_CP5_WW-10-WW10.csv'  # Replace with your actual CSV file path
+csv_file_path = 'WLW_A15_6262_DRV_RESET_EMCA-DRV_RESET_ICM-DRV_RESET_MCP_WW5-WW15.csv'  # Replace with your actual CSV file path
 df = pd.read_csv(csv_file_path)
 
 # Iterate over the rows in the DataFrame and insert them into the database
 for index, row in df.iterrows():
     # Create an instance of YourModel
-    record = YourModel(
+    record = MDNADB(
         visual_id=row['VISUAL_ID'],
         substructure_id=row['SUBSTRUCTURE_ID'],
         sort_lot=row['SORT_LOT'],

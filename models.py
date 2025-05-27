@@ -2,18 +2,15 @@ from sqlalchemy import DateTime, Float, create_engine, Column, Integer, String, 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-# Create an engine with a file-based SQLite database
-engine = create_engine('sqlite:///example.db', echo=True)
+engine = create_engine('sqlite:///data.db', echo=True)
 
-# Define a model
 Base = declarative_base()
 
-class YourModel(Base):
-    __tablename__ = 'raw_data'  # Replace with your actual table name
-
-    # Define columns
+class MDNADB(Base):
+    __tablename__ = 'raw_data'  
+    
     id = Column(Integer, Sequence('raw_data_id_seq'), primary_key=True)
-    visual_id = Column(String)  # Assuming VISUAL_ID is unique
+    visual_id = Column(String) 
     substructure_id = Column(String)
     sort_lot = Column(String)
     sort_wafer = Column(String)
@@ -50,6 +47,9 @@ class YourModel(Base):
     string_distinctive_value = Column(String)
     parameter_group = Column(String)
     lvm_address = Column(String)
+    decoded_status = Column(String)
+    decoded_group = Column(String)
+    decoded_fail_info = Column(String)
 
 # Create tables in the database
 Base.metadata.create_all(engine)

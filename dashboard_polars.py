@@ -1,30 +1,30 @@
 import streamlit as st
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models import YourModel 
+from models import MDNADB 
 import plotly.express as px
 import polars as pl
 
 st.set_page_config(layout="wide", page_title="MDNA YIELD DASHBOARD", initial_sidebar_state = "expanded")
 
 st.title("MDNA YIELD DASHBOARD")
-engine = create_engine('sqlite:///example.db') 
+engine = create_engine('sqlite:///data.db') 
 Session = sessionmaker(bind=engine)
 session = Session()
 
 @st.cache_data(ttl=7200, show_spinner="Fetching data from DB...")
 def load_data():
-    query = session.query(YourModel.interface_bin, 
-                    YourModel.program_name, 
-                    YourModel.visual_id, 
-                    YourModel.lot, 
-                    YourModel.functional_bin, 
-                    YourModel.operation, 
-                    YourModel.lots_end_ww,
-                    YourModel.test_name,
-                    YourModel.test_result,
-                    YourModel.parameter_group,
-                    YourModel.lvm_address,
+    query = session.query(MDNADB.interface_bin, 
+                    MDNADB.program_name, 
+                    MDNADB.visual_id, 
+                    MDNADB.lot, 
+                    MDNADB.functional_bin, 
+                    MDNADB.operation, 
+                    MDNADB.lots_end_ww,
+                    MDNADB.test_name,
+                    MDNADB.test_result,
+                    MDNADB.parameter_group,
+                    MDNADB.lvm_address,
                     ).all()
 
     data = [{'INTERFACE_BIN': result.interface_bin, 
